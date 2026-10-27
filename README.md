@@ -3,12 +3,8 @@
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-HistGBT-orange?logo=scikit-learn&logoColor=white)
 ![NumPy](https://img.shields.io/badge/NumPy-scientific-013243?logo=numpy)
-![License](https://img.shields.io/badge/license-MIT-green)
-![Status](https://img.shields.io/badge/submission-final-brightgreen)
 
 > Classifies 6-panel ON/OFF radio cadences into **9 signal classes** using a drift-aware feature pipeline and a gradient-boosting ensemble, designed to handle the **GBT → Parkes (PKS) telescope domain shift**.
-
----
 
 ## 📋 Table of Contents
 
@@ -20,13 +16,9 @@
 - [Dependencies](#-dependencies)
 - [Team](#-team)
 
----
-
 ## 📡 Problem Statement
 
 Given raw radio telescope spectrograms recorded in a 6-panel ON/OFF cadence, classify each observation into one of 9 categories. The key challenge is **telescope domain shift**: training data comes from the **Green Bank Telescope (GBT)** while test data comes from the **Parkes Telescope (PKS)**.
-
----
 
 ## 🏷️ Signal Classes
 
@@ -42,8 +34,6 @@ Given raw radio telescope spectrograms recorded in a 6-panel ON/OFF cadence, cla
 | `rfi_persistent` | Persistent human-made RFI |
 | `noise` | Background noise (no signal) |
 
----
-
 ## 🧠 Approach
 
 1. **Preprocessing** — Remove row glitches, smooth bandpass, normalise per panel, mask GBT centre frequency spike.
@@ -53,8 +43,6 @@ Given raw radio telescope spectrograms recorded in a 6-panel ON/OFF cadence, cla
 5. **Ensemble Model** — `HistGradientBoostingClassifier` (4 seeds), class-balanced.
 6. **Domain Shift Mitigation** — Drop the most telescope-dependent features based on cross-telescope AUC probe.
 7. **Self-Training (v2)** — Iteratively incorporate confident test predictions as pseudo-labels (`final2.py`).
-
----
 
 ## 🗂️ File Structure
 
@@ -69,32 +57,6 @@ Given raw radio telescope spectrograms recorded in a 6-panel ON/OFF cadence, cla
  ┗ 📄 README.md         # This file
 ```
 
----
-
-## ▶️ How to Reproduce
-
-**1. Setup dataset**
-
-Unzip the competition dataset into the project root:
-```
-signal-hunters-round2/
-```
-
-**2. Extract features**
-```bash
-python run_feats.py      # per-panel drift features  (~2 min)
-python run_feats2.py     # cadence track features    (~10 min on 1 CPU)
-```
-
-**3. Train & predict**
-```bash
-python final.py          # submission v1
-```
-
-> Only the provided competition data is used. No outside labels, no hand-labelling.
-
----
-
 ## 📦 Dependencies
 
 ```bash
@@ -108,8 +70,6 @@ pip install numpy scipy pandas scikit-learn
 | `pandas` | CSV I/O, metadata handling |
 | `scikit-learn` | HistGradientBoostingClassifier, metrics |
 
----
-
 ## 👥 Team
 
 **Team Nexus** — Hack4Hack 2026
@@ -117,8 +77,6 @@ pip install numpy scipy pandas scikit-learn
 | Name | Role |
 |------|------|
 | Tanya Garg | ML Pipeline & Feature Engineering |
-| Arpan | Model Training & Submission |
-
----
+| Aryan Pal| Model Training & Submission |
 
 <p align="center"><sub>Submission for Signal Hunters — Hack4Hack 2026 · Team Nexus</sub></p>
