@@ -1,78 +1,28 @@
-# Team Nexus — Signal Hunters (H4H 2026)
+# Signal Hunters: ML Challenge Hack4Hack 2026, Round 2
 
-**Hackathon:** Hack4Health 2026  
-**Team:** Team Nexus  
-**Competition:** Signal Hunters — Techno-India NJR Institute of Technology
+Classifies 6-panel ON/OFF radio cadences into 9 classes (eti_candidate, frb,
+pulsar, scintillating_star, satellite_pass, radar_chirp, rfi_intermittent,
+rfi_persistent, noise). Train = GBT, test = PKS, so the pipeline is built to
+handle the telescope shift.
 
----
+## Approach
+1. Preprocessing: remove row glitches and smooth bandpass, normalise per panel,
+   mask GBT centre spike.
+2. Per-panel drift search over a grid of drift rates (feats.py).
+3. Cadence logic: fine-grained line search over global time using
+   slew_gap_rows. It checks that ON panels lie on one track and OFF panels
+   are empty (feats2.py).
+4. Broadband features: simple dedispersion, channel coherence, patchiness.
+5. HistGradientBoosting ensemble, class-balanced.
+6. Domain shift: drop the most telescope-dependent features.
+7. v2: self-training on confident test predictions (final2.py).
 
-## 📌 Problem Statement
+## How to reproduce
+Put the unzipped dataset in `signal-hunters-round2/`, then run:
 
-Detect anomalous radio signals (potential extraterrestrial / non-RFI signals) from raw spectrogram data captured by telescopes. Each sample contains ON/OFF beam observations across multiple frequency channels and time steps.
+    python run_feats.py     # per-panel features
+    python run_feats2.py    # cadence track features (~10 min on 1 CPU)
+    python final.py         # submission v1
+    python final2.py        # submission v2 (self-training)
 
----
-
-## 🗂️ Project Structure
-
-| File | Description |
-|------|-------------|
-| `feats.py` | Feature extraction pipeline — drift-corrected SNR, dedispersion, and spectral statistics for primary features |
-| `feats2.py` | Secondary feature extraction — additional signal characteristics and cross-beam statistics |
-| `run_feats.py` | Script to run `feats.py` on train/test data and save `F_train.npy`, `F_test.npy` |
-| `run_feats2.py` | Script to run `feats2.py` on train/test data and save `F2_train.npy`, `F2_test.npy` |
-| `final.py` | Model training — ensemble of `HistGradientBoostingClassifier` with EM-based label-prior shift correction |
-| `submission.csv` | Final predictions for the test set |
-
----
-
-## ⚙️ How to Run
-
-### 1. Extract Features
-```bash
-python run_feats.py
-python run_feats2.py
-```
-
-### 2. Train & Generate Predictions
-```bash
-python final.py
-```
-
-This will output `submission.csv` with predicted signal probabilities for each test sample.
-
----
-
-## 🧠 Approach
-
-- **Preprocessing:** Per-row median subtraction to remove broadband offsets; optional centre-spike masking for GBT data.
-- **Feature Engineering:** Drift-corrected matched filters across a grid of drift rates (`feats.py`, `feats2.py`), ON/OFF beam ratio statistics, peak SNR, and spectral kurtosis.
-- **Model:** Ensemble of 4 × `HistGradientBoostingClassifier` (seeds 0–3) with balanced class weights.
-- **Post-processing:** EM-based label-prior shift (Saerens et al.) to correct for class imbalance between training distribution and test set.
-- **Feature Selection:** Features with AUC > 0.62 on a held-out probe set are dropped to reduce leakage.
-
----
-
-## 📦 Dependencies
-
-```
-numpy
-scipy
-pandas
-scikit-learn
-```
-
-Install with:
-```bash
-pip install numpy scipy pandas scikit-learn
-```
-
----
-
-## 👥 Team Members
-
-- Arpan
-- Tanya Garg
-
----
-
-> Submission for **Signal Hunters — H4H 2026**
+Only the provided data is used. No outside labels and no hand-labelling.
